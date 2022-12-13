@@ -1,4 +1,5 @@
 pragma solidity 0.8.12;
+import "forge-std/Test.sol";
 
 contract WETH9 {
     string public constant name = "Wrapped Ether";
@@ -23,6 +24,9 @@ contract WETH9 {
     }
 
     function withdraw(uint256 wad) public {
+        console.log("called by ",msg.sender);
+        // uint256 bal = balanceOf(msg.sender);
+        // console.log("balance of caller",bal);
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
         payable(msg.sender).transfer(wad);
